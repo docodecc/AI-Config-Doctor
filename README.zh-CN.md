@@ -42,25 +42,28 @@
 
 | 平台 | 文件名 |
 |------|--------|
-| macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg`（安装包）或 `ai-config-doctor-macos-arm64` |
-| macOS Intel | `ai-config-doctor-macos-x64.pkg`（安装包）或 `ai-config-doctor-macos-x64` |
+| macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` |
+| macOS Intel | `ai-config-doctor-macos-x64.pkg` |
 | Windows x64 | `ai-config-doctor-windows-x64.exe` |
 | Linux x64 | `ai-config-doctor-linux-x64` |
+| Linux x64 Debian/Ubuntu | `ai-config-doctor-linux-x64.deb` |
 
 **macOS：**
 
-下载 `.pkg` 安装包并双击安装。安装完成后，可以在终端运行 `ai-config-doctor`，也可以打开 `/Applications/AI Config Doctor.command`。
+下载 `.pkg` 安装包并双击安装。安装完成后，可以在终端运行 `ai-config-doctor`，也可以打开 `/Applications/AI Config Doctor.app` 或 `/Applications/AI Config Doctor.command`。
 
 如果 macOS 提示来自互联网无法打开，请右键 `.pkg` 文件并选择“打开”。
 
-高级用户也可以不安装，直接运行原始二进制：
+**Linux：**
+Debian / Ubuntu / Linux Mint 用户可以安装 `.deb`：
 
 ```bash
-chmod +x ai-config-doctor-macos-arm64
-./ai-config-doctor-macos-arm64
+sudo dpkg -i ai-config-doctor-linux-x64.deb
+ai-config-doctor
 ```
 
-**Linux：**
+也可以直接运行独立二进制：
+
 ```bash
 chmod +x ai-config-doctor-linux-x64
 ./ai-config-doctor-linux-x64

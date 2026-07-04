@@ -50,19 +50,94 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           PKG_ROOT="pkg-root"
-          mkdir -p "$PKG_ROOT/usr/local/bin" "$PKG_ROOT/Applications"
+          APP_DIR="$PKG_ROOT/Applications/AI Config Doctor.app"
+          mkdir -p \
+            "$PKG_ROOT/usr/local/bin" \
+            "$PKG_ROOT/usr/local/share/ai-config-doctor" \
+            "$APP_DIR/Contents/MacOS" \
+            "$APP_DIR/Contents/Resources"
           cp "dist/${{ matrix.asset_name }}" "$PKG_ROOT/usr/local/bin/ai-config-doctor"
-          cat > "$PKG_ROOT/Applications/AI Config Doctor.command" <<'SCRIPT'
-          #!/bin/zsh
-          /usr/local/bin/ai-config-doctor
-          echo
-          echo "Press Enter to close this window..."
-          read -r _
-          SCRIPT
-          chmod +x "$PKG_ROOT/usr/local/bin/ai-config-doctor" "$PKG_ROOT/Applications/AI Config Doctor.command"
+          cp "assets/icons/ai-config-doctor.icns" "$PKG_ROOT/usr/local/share/ai-config-doctor/ai-config-doctor.icns"
+          cp "assets/icons/ai-config-doctor.icns" "$APP_DIR/Contents/Resources/ai-config-doctor.icns"
+          printf '%s\n' \
+            '#!/bin/zsh' \
+            'osascript -e '\''tell application "Terminal" to do script "/usr/local/bin/ai-config-doctor"'\'' -e '\''tell application "Terminal" to activate'\''' \
+            > "$APP_DIR/Contents/MacOS/AI Config Doctor"
+          cat > "$APP_DIR/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleDisplayName</key>
+            <string>AI Config Doctor</string>
+            <key>CFBundleExecutable</key>
+            <string>AI Config Doctor</string>
+            <key>CFBundleIconFile</key>
+            <string>ai-config-doctor</string>
+            <key>CFBundleIdentifier</key>
+            <string>cc.docode.ai-config-doctor</string>
+            <key>CFBundleName</key>
+            <string>AI Config Doctor</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${VERSION}</string>
+            <key>CFBundleVersion</key>
+            <string>${VERSION}</string>
+          </dict>
+          </plist>
+          PLIST
+          printf '%s\n' \
+            '#!/bin/zsh' \
+            '/usr/local/bin/ai-config-doctor' \
+            'echo' \
+            'echo "Press Enter to close this window..."' \
+            'read -r _' \
+            > "$PKG_ROOT/Applications/AI Config Doctor.command"
+          chmod +x \
+            "$PKG_ROOT/usr/local/bin/ai-config-doctor" \
+            "$APP_DIR/Contents/MacOS/AI Config Doctor" \
+            "$PKG_ROOT/Applications/AI Config Doctor.command"
           pkgbuild             --root "$PKG_ROOT"             --identifier "cc.docode.ai-config-doctor"             --version "$VERSION"             --install-location "/"             "dist/${{ matrix.asset_name }}.pkg"
 
+      - name: Create Linux Debian package
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DEB_ROOT="deb-root"
+          mkdir -p \
+            "$DEB_ROOT/DEBIAN" \
+            "$DEB_ROOT/usr/local/bin" \
+            "$DEB_ROOT/usr/share/applications" \
+            "$DEB_ROOT/usr/share/icons/hicolor/256x256/apps"
+          cp "dist/${{ matrix.asset_name }}" "$DEB_ROOT/usr/local/bin/ai-config-doctor"
+          cp "assets/icons/ai-config-doctor-256.png" "$DEB_ROOT/usr/share/icons/hicolor/256x256/apps/ai-config-doctor.png"
+          chmod 755 "$DEB_ROOT/usr/local/bin/ai-config-doctor"
+          printf '%s\n' \
+            '[Desktop Entry]' \
+            'Type=Application' \
+            'Name=AI Config Doctor' \
+            'Comment=Codex and Claude Code API configuration doctor' \
+            'Exec=x-terminal-emulator -e ai-config-doctor' \
+            'Icon=ai-config-doctor' \
+            'Terminal=false' \
+            'Categories=Utility;Development;' \
+            > "$DEB_ROOT/usr/share/applications/ai-config-doctor.desktop"
+          cat > "$DEB_ROOT/DEBIAN/control" <<EOF
+          Package: ai-config-doctor
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: docode.cc <support@docode.cc>
+          Description: Codex and Claude Code API configuration doctor
+           AI Config Doctor helps diagnose, install, configure, and resume Codex / Claude Code sessions.
+          EOF
+          dpkg-deb --build "$DEB_ROOT" "dist/ai-config-doctor-linux-x64.deb"
+
       - name: Upload artifact
+        if: runner.os != 'macOS'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
@@ -74,6 +149,13 @@ jobs:
         with:
           name: ${{ matrix.asset_name }}.pkg
           path: dist/${{ matrix.asset_name }}.pkg
+
+      - name: Upload Linux Debian package
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-config-doctor-linux-x64.deb
+          path: dist/ai-config-doctor-linux-x64.deb
 
   release:
     needs: build
@@ -107,12 +189,11 @@ jobs:
 
             | 平台 | 文件 | 说明 |
             |------|------|------|
-            | macOS Apple Silicon | `ai-config-doctor-macos-arm64` | M1/M2/M3/M4，`chmod +x` 后运行 |
-            | macOS Apple Silicon 安装包 | `ai-config-doctor-macos-arm64.pkg` | 双击安装，安装后可运行 `ai-config-doctor` |
-            | macOS Intel | `ai-config-doctor-macos-x64` | Intel Mac，`chmod +x` 后运行 |
-            | macOS Intel 安装包 | `ai-config-doctor-macos-x64.pkg` | 双击安装，安装后可运行 `ai-config-doctor` |
+            | macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` | M1/M2/M3/M4，双击安装，安装后可运行 `ai-config-doctor` |
+            | macOS Intel | `ai-config-doctor-macos-x64.pkg` | Intel Mac，双击安装，安装后可运行 `ai-config-doctor` |
             | Windows x64 | `ai-config-doctor-windows-x64.exe` | Windows 10/11 64 位，双击运行 |
             | Linux x64 | `ai-config-doctor-linux-x64` | `chmod +x` 后运行 |
+            | Linux x64 Debian/Ubuntu | `ai-config-doctor-linux-x64.deb` | `sudo dpkg -i` 安装 |
 
             ### 使用
 
@@ -123,10 +204,9 @@ jobs:
             ---
             MIT License · by [docode.cc](https://docode.cc)
           files: |
-            artifacts/ai-config-doctor-macos-arm64/ai-config-doctor-macos-arm64
             artifacts/ai-config-doctor-macos-arm64.pkg/ai-config-doctor-macos-arm64.pkg
-            artifacts/ai-config-doctor-macos-x64/ai-config-doctor-macos-x64
             artifacts/ai-config-doctor-macos-x64.pkg/ai-config-doctor-macos-x64.pkg
             artifacts/ai-config-doctor-windows-x64.exe/ai-config-doctor-windows-x64.exe
             artifacts/ai-config-doctor-linux-x64/ai-config-doctor-linux-x64
+            artifacts/ai-config-doctor-linux-x64.deb/ai-config-doctor-linux-x64.deb
             artifacts/SHA256SUMS.txt

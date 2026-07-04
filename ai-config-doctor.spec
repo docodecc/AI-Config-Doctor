@@ -1,5 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys
+
+
+if sys.platform == 'darwin':
+    app_icon = 'assets/icons/ai-config-doctor.icns'
+elif sys.platform.startswith('win'):
+    app_icon = 'assets/icons/ai-config-doctor.ico'
+else:
+    app_icon = None
+
 
 a = Analysis(
     ['check_codex.py'],
@@ -35,4 +45,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=app_icon,
 )

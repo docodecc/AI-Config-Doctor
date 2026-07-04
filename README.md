@@ -41,25 +41,28 @@ Go to the [Releases](../../releases) page and download the file for your platfor
 
 | Platform | File |
 |---|---|
-| macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` *(installer)* or `ai-config-doctor-macos-arm64` |
-| macOS Intel | `ai-config-doctor-macos-x64.pkg` *(installer)* or `ai-config-doctor-macos-x64` |
+| macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` |
+| macOS Intel | `ai-config-doctor-macos-x64.pkg` |
 | Windows x64 | `ai-config-doctor-windows-x64.exe` |
 | Linux x64 | `ai-config-doctor-linux-x64` |
+| Linux x64 Debian/Ubuntu | `ai-config-doctor-linux-x64.deb` |
 
 **macOS:**
 
-Download the `.pkg` installer and double-click it to install. After installation, run `ai-config-doctor` from Terminal, or open `/Applications/AI Config Doctor.command`.
+Download the `.pkg` installer and double-click it to install. After installation, run `ai-config-doctor` from Terminal, open `/Applications/AI Config Doctor.app`, or use `/Applications/AI Config Doctor.command`.
 
 If macOS blocks the installer because it was downloaded from the Internet, right-click the `.pkg` file and choose **Open** once.
 
-Advanced users can also run the raw binary without installing:
+**Linux:**
+
+Install the Debian package on Debian / Ubuntu / Linux Mint:
 
 ```bash
-chmod +x ai-config-doctor-macos-arm64
-./ai-config-doctor-macos-arm64
+sudo dpkg -i ai-config-doctor-linux-x64.deb
+ai-config-doctor
 ```
 
-**Linux:**
+Or run the standalone binary directly:
 
 ```bash
 chmod +x ai-config-doctor-linux-x64
