@@ -41,11 +41,11 @@ Go to the [Releases](../../releases) page and download the file for your platfor
 
 | Platform | File |
 |---|---|
-| macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` |
-| macOS Intel | `ai-config-doctor-macos-x64.pkg` |
-| Windows x64 | `ai-config-doctor-windows-x64.exe` |
-| Linux x64 | `ai-config-doctor-linux-x64` |
-| Linux x64 Debian/Ubuntu | `ai-config-doctor-linux-x64.deb` |
+| macOS Apple Silicon | `ai-config-doctor-vX.Y.Z-macos-arm64.pkg` |
+| macOS Intel | `ai-config-doctor-vX.Y.Z-macos-x64.pkg` |
+| Windows x64 | `ai-config-doctor-vX.Y.Z-windows-x64.exe` |
+| Linux x64 | `ai-config-doctor-vX.Y.Z-linux-x64` |
+| Linux x64 Debian/Ubuntu | `ai-config-doctor-vX.Y.Z-linux-x64.deb` |
 
 **macOS:**
 
@@ -58,20 +58,20 @@ If macOS blocks the installer because it was downloaded from the Internet, right
 Install the Debian package on Debian / Ubuntu / Linux Mint:
 
 ```bash
-sudo dpkg -i ai-config-doctor-linux-x64.deb
+sudo dpkg -i ai-config-doctor-vX.Y.Z-linux-x64.deb
 ai-config-doctor
 ```
 
 Or run the standalone binary directly:
 
 ```bash
-chmod +x ai-config-doctor-linux-x64
-./ai-config-doctor-linux-x64
+chmod +x ai-config-doctor-vX.Y.Z-linux-x64
+./ai-config-doctor-vX.Y.Z-linux-x64
 ```
 
 **Windows:**
 
-Double-click `ai-config-doctor-windows-x64.exe`.
+Double-click `ai-config-doctor-vX.Y.Z-windows-x64.exe`.
 
 ---
 

@@ -136,26 +136,32 @@ jobs:
           EOF
           dpkg-deb --build "$DEB_ROOT" "dist/ai-config-doctor-linux-x64.deb"
 
-      - name: Upload artifact
-        if: runner.os != 'macOS'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.asset_name }}
-          path: dist/${{ matrix.asset_name }}
+      - name: Collect release assets
+        shell: bash
+        run: |
+          mkdir -p release-assets
+          VERSIONED_PREFIX="ai-config-doctor-${GITHUB_REF_NAME}"
+          case "${{ matrix.asset_name }}" in
+            ai-config-doctor-macos-arm64)
+              cp "dist/${{ matrix.asset_name }}.pkg" "release-assets/${VERSIONED_PREFIX}-macos-arm64.pkg"
+              ;;
+            ai-config-doctor-macos-x64)
+              cp "dist/${{ matrix.asset_name }}.pkg" "release-assets/${VERSIONED_PREFIX}-macos-x64.pkg"
+              ;;
+            ai-config-doctor-windows-x64.exe)
+              cp "dist/${{ matrix.asset_name }}" "release-assets/${VERSIONED_PREFIX}-windows-x64.exe"
+              ;;
+            ai-config-doctor-linux-x64)
+              cp "dist/${{ matrix.asset_name }}" "release-assets/${VERSIONED_PREFIX}-linux-x64"
+              cp "dist/ai-config-doctor-linux-x64.deb" "release-assets/${VERSIONED_PREFIX}-linux-x64.deb"
+              ;;
+          esac
 
-      - name: Upload macOS installer package
-        if: runner.os == 'macOS'
+      - name: Upload release assets
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.asset_name }}.pkg
-          path: dist/${{ matrix.asset_name }}.pkg
-
-      - name: Upload Linux Debian package
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ai-config-doctor-linux-x64.deb
-          path: dist/ai-config-doctor-linux-x64.deb
+          name: release-${{ matrix.asset_name }}
+          path: release-assets/*
 
   release:
     needs: build
@@ -189,11 +195,11 @@ jobs:
 
             | 平台 | 文件 | 说明 |
             |------|------|------|
-            | macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` | M1/M2/M3/M4，双击安装，安装后可运行 `ai-config-doctor` |
-            | macOS Intel | `ai-config-doctor-macos-x64.pkg` | Intel Mac，双击安装，安装后可运行 `ai-config-doctor` |
-            | Windows x64 | `ai-config-doctor-windows-x64.exe` | Windows 10/11 64 位，双击运行 |
-            | Linux x64 | `ai-config-doctor-linux-x64` | `chmod +x` 后运行 |
-            | Linux x64 Debian/Ubuntu | `ai-config-doctor-linux-x64.deb` | `sudo dpkg -i` 安装 |
+            | macOS Apple Silicon | `ai-config-doctor-${{ github.ref_name }}-macos-arm64.pkg` | M1/M2/M3/M4，双击安装，安装后可运行 `ai-config-doctor` |
+            | macOS Intel | `ai-config-doctor-${{ github.ref_name }}-macos-x64.pkg` | Intel Mac，双击安装，安装后可运行 `ai-config-doctor` |
+            | Windows x64 | `ai-config-doctor-${{ github.ref_name }}-windows-x64.exe` | Windows 10/11 64 位，双击运行 |
+            | Linux x64 | `ai-config-doctor-${{ github.ref_name }}-linux-x64` | `chmod +x` 后运行 |
+            | Linux x64 Debian/Ubuntu | `ai-config-doctor-${{ github.ref_name }}-linux-x64.deb` | `sudo dpkg -i` 安装 |
 
             ### 使用
 
@@ -204,9 +210,5 @@ jobs:
             ---
             MIT License · by [docode.cc](https://docode.cc)
           files: |
-            artifacts/ai-config-doctor-macos-arm64.pkg/ai-config-doctor-macos-arm64.pkg
-            artifacts/ai-config-doctor-macos-x64.pkg/ai-config-doctor-macos-x64.pkg
-            artifacts/ai-config-doctor-windows-x64.exe/ai-config-doctor-windows-x64.exe
-            artifacts/ai-config-doctor-linux-x64/ai-config-doctor-linux-x64
-            artifacts/ai-config-doctor-linux-x64.deb/ai-config-doctor-linux-x64.deb
+            artifacts/**/ai-config-doctor-${{ github.ref_name }}-*
             artifacts/SHA256SUMS.txt

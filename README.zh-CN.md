@@ -42,11 +42,11 @@
 
 | 平台 | 文件名 |
 |------|--------|
-| macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` |
-| macOS Intel | `ai-config-doctor-macos-x64.pkg` |
-| Windows x64 | `ai-config-doctor-windows-x64.exe` |
-| Linux x64 | `ai-config-doctor-linux-x64` |
-| Linux x64 Debian/Ubuntu | `ai-config-doctor-linux-x64.deb` |
+| macOS Apple Silicon | `ai-config-doctor-vX.Y.Z-macos-arm64.pkg` |
+| macOS Intel | `ai-config-doctor-vX.Y.Z-macos-x64.pkg` |
+| Windows x64 | `ai-config-doctor-vX.Y.Z-windows-x64.exe` |
+| Linux x64 | `ai-config-doctor-vX.Y.Z-linux-x64` |
+| Linux x64 Debian/Ubuntu | `ai-config-doctor-vX.Y.Z-linux-x64.deb` |
 
 **macOS：**
 
@@ -58,19 +58,19 @@
 Debian / Ubuntu / Linux Mint 用户可以安装 `.deb`：
 
 ```bash
-sudo dpkg -i ai-config-doctor-linux-x64.deb
+sudo dpkg -i ai-config-doctor-vX.Y.Z-linux-x64.deb
 ai-config-doctor
 ```
 
 也可以直接运行独立二进制：
 
 ```bash
-chmod +x ai-config-doctor-linux-x64
-./ai-config-doctor-linux-x64
+chmod +x ai-config-doctor-vX.Y.Z-linux-x64
+./ai-config-doctor-vX.Y.Z-linux-x64
 ```
 
 **Windows：**
-双击 `ai-config-doctor-windows-x64.exe` 直接运行。
+双击 `ai-config-doctor-vX.Y.Z-windows-x64.exe` 直接运行。
 
 ---
 
