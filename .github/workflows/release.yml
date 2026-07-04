@@ -8,17 +8,21 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-14
             artifact_name: ai-config-doctor
-            asset_name: ai-config-doctor-macos
+            asset_name: ai-config-doctor-macos-arm64
+          - os: macos-13
+            artifact_name: ai-config-doctor
+            asset_name: ai-config-doctor-macos-x64
           - os: windows-latest
             artifact_name: ai-config-doctor.exe
-            asset_name: ai-config-doctor-windows.exe
+            asset_name: ai-config-doctor-windows-x64.exe
           - os: ubuntu-latest
             artifact_name: ai-config-doctor
-            asset_name: ai-config-doctor-linux
+            asset_name: ai-config-doctor-linux-x64
 
     runs-on: ${{ matrix.os }}
 
@@ -38,7 +42,7 @@ jobs:
 
       - name: Rename artifact
         shell: bash
-        run: mv dist/${{ matrix.artifact_name }} dist/${{ matrix.asset_name }}
+        run: mv "dist/${{ matrix.artifact_name }}" "dist/${{ matrix.asset_name }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -58,6 +62,13 @@ jobs:
         with:
           path: artifacts
 
+      - name: Generate SHA256 checksums
+        shell: bash
+        run: |
+          cd artifacts
+          find . -maxdepth 2 -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -65,23 +76,28 @@ jobs:
           body: |
             ## AI Config Doctor ${{ github.ref_name }}
 
-            Codex / Claude Code 第三方 API 配置诊断与向导工具，面向非技术用户。
+            Codex / Claude Code 第三方 API 配置诊断、安装向导与会话恢复工具，面向非技术用户。
 
-            ### 📥 下载
+            ### 下载
 
             | 平台 | 文件 | 说明 |
             |------|------|------|
-            | macOS | `ai-config-doctor-macos` | `chmod +x` 后直接运行 |
-            | Windows | `ai-config-doctor-windows.exe` | 双击运行 |
-            | Linux | `ai-config-doctor-linux` | `chmod +x` 后直接运行 |
+            | macOS Apple Silicon | `ai-config-doctor-macos-arm64` | M1/M2/M3/M4，`chmod +x` 后运行 |
+            | macOS Intel | `ai-config-doctor-macos-x64` | Intel Mac，`chmod +x` 后运行 |
+            | Windows x64 | `ai-config-doctor-windows-x64.exe` | Windows 10/11 64 位，双击运行 |
+            | Linux x64 | `ai-config-doctor-linux-x64` | `chmod +x` 后运行 |
 
-            ### 🚀 使用
+            ### 使用
 
             下载对应平台文件后直接运行，无需安装 Python 或任何依赖。
 
+            SHA256 校验值见 `SHA256SUMS.txt`。
+
             ---
-            by [docode.cc](https://docode.cc) · QQ：3963220481
+            MIT License · by [docode.cc](https://docode.cc)
           files: |
-            artifacts/ai-config-doctor-macos/ai-config-doctor-macos
-            artifacts/ai-config-doctor-windows.exe/ai-config-doctor-windows.exe
-            artifacts/ai-config-doctor-linux/ai-config-doctor-linux
+            artifacts/ai-config-doctor-macos-arm64/ai-config-doctor-macos-arm64
+            artifacts/ai-config-doctor-macos-x64/ai-config-doctor-macos-x64
+            artifacts/ai-config-doctor-windows-x64.exe/ai-config-doctor-windows-x64.exe
+            artifacts/ai-config-doctor-linux-x64/ai-config-doctor-linux-x64
+            artifacts/SHA256SUMS.txt

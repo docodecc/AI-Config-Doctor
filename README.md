@@ -40,18 +40,19 @@
 
 | 平台 | 文件名 |
 |------|--------|
-| macOS | `ai-config-doctor-macos` |
-| Windows | `ai-config-doctor-windows.exe` |
-| Linux | `ai-config-doctor-linux` |
+| macOS Apple Silicon | `ai-config-doctor-macos-arm64` |
+| macOS Intel | `ai-config-doctor-macos-x64` |
+| Windows x64 | `ai-config-doctor-windows-x64.exe` |
+| Linux x64 | `ai-config-doctor-linux-x64` |
 
 **macOS / Linux：**
 ```bash
-chmod +x ai-config-doctor-macos
-./ai-config-doctor-macos
+chmod +x ai-config-doctor-macos-arm64
+./ai-config-doctor-macos-arm64
 ```
 
 **Windows：**
-双击 `ai-config-doctor-windows.exe` 直接运行。
+双击 `ai-config-doctor-windows-x64.exe` 直接运行。
 
 ---
 
@@ -217,52 +218,24 @@ pyinstaller --onefile --name "ai-config-doctor" check_codex.py
 
 ---
 
-## ⚠️ 版权与免责声明
+## ⚖️ License 与免责声明
 
-> **请在使用、分发或二次开发本工具前，仔细阅读以下条款。**
+本项目采用 [MIT License](./LICENSE) 开源。你可以自由使用、复制、修改、合并、发布、分发、再授权或销售本软件副本，但需要在软件副本或主要部分中保留版权声明和许可声明。
 
+### 免责声明
+
+- 本工具按“现状”提供，不作任何明示或暗示的保证。
+- 使用本工具产生的任何后果（包括配置错误、数据丢失、账号限制等）由使用者自行承担。
+- 本工具不存储、不上传 API Key 或用户会话数据，所有配置仅写入本机文件。
+- 本工具不是 OpenAI、Anthropic、Codex 或 Claude Code 的官方产品。
+
+### 署名建议
+
+如果你在自己的项目、文章或教程中引用本工具，欢迎注明：
+
+```text
+AI Config Doctor by docode.cc
 ```
-╔══════════════════════════════════════════════════════════════╗
-║                      版权声明 & 免责声明                     ║
-╠══════════════════════════════════════════════════════════════╣
-║                                                              ║
-║  本工具由 docode.cc 独立开发，保留所有权利。                  ║
-║                                                              ║
-║  【个人与学习用途】                                           ║
-║    免费使用，无需授权。                                        ║
-║                                                              ║
-║  【商业用途】                                                 ║
-║    任何形式的商业使用（包括但不限于集成至商业产品、            ║
-║    作为付费服务的一部分提供、用于商业培训等）                   ║
-║    须事先联系作者并获得书面授权，且必须在显著位置注明：         ║
-║    "本产品使用了由 docode.cc 开发的 AI Config Doctor"。       ║
-║                                                              ║
-║  【免责条款】                                                 ║
-║    本工具按"现状"提供，不作任何明示或暗示的保证。              ║
-║    使用本工具所产生的任何后果（包括数据丢失、账号封禁、         ║
-║    配置错误等）由使用者自行承担，与 docode.cc 无关。           ║
-║    本工具不存储、不上传任何 API Key 或用户数据，               ║
-║    所有配置仅写入本机文件。                                    ║
-║                                                              ║
-║  【二次分发与修改】                                           ║
-║    可在 MIT 协议范围内自由修改和分发，但须保留本声明，          ║
-║    且不得以 docode.cc 名义进行背书或推广。                     ║
-║                                                              ║
-║  联系作者：https://docode.cc  QQ：3963220481                  ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-```
-
-### 简要说明
-
-| 使用场景 | 是否允许 | 要求 |
-|----------|----------|------|
-| 个人学习、自用 | ✅ 允许 | 无 |
-| 开源项目集成 | ✅ 允许 | 保留署名和本声明 |
-| 商业产品集成 | ⚠️ 需授权 | 联系 docode.cc 获取书面授权，并注明来源 |
-| 付费分发 | ⚠️ 需授权 | 联系 docode.cc 获取书面授权 |
-| 去除署名后分发 | ❌ 禁止 | — |
-| 冒用 docode.cc 名义 | ❌ 禁止 | — |
 
 ---
 
