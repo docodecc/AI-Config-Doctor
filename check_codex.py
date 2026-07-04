@@ -22,7 +22,7 @@ from pathlib import Path
 CODEX_DESKTOP_URL = "https://codex.com"
 NODE_DOWNLOAD_URL = "https://nodejs.org/zh-cn/download"
 APP_NAME = "AI Config Doctor"
-APP_SUBTITLE = "Codex / Claude Code 配置诊断与向导"
+APP_SUBTITLE = "Codex / Claude Code 配置诊断与向导 · by docode.cc"
 
 
 def _detect_language():
@@ -43,7 +43,7 @@ def _detect_language():
 LANGUAGE = _detect_language()
 
 TRANSLATIONS = {
-    "Codex / Claude Code 配置诊断与向导": "Codex / Claude Code configuration doctor and guide",
+    "Codex / Claude Code 配置诊断与向导 · by docode.cc": "Codex / Claude Code configuration doctor and guide · by docode.cc",
     "时间未知": "Unknown time",
     "未命名会话": "Untitled session",
     "暂无摘要": "No summary",
