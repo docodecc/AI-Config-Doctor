@@ -1,0 +1,87 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            artifact_name: ai-config-doctor
+            asset_name: ai-config-doctor-macos
+          - os: windows-latest
+            artifact_name: ai-config-doctor.exe
+            asset_name: ai-config-doctor-windows.exe
+          - os: ubuntu-latest
+            artifact_name: ai-config-doctor
+            asset_name: ai-config-doctor-linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build
+        run: pyinstaller ai-config-doctor.spec
+
+      - name: Rename artifact
+        shell: bash
+        run: mv dist/${{ matrix.artifact_name }} dist/${{ matrix.asset_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: AI Config Doctor ${{ github.ref_name }}
+          body: |
+            ## AI Config Doctor ${{ github.ref_name }}
+
+            Codex / Claude Code 第三方 API 配置诊断与向导工具，面向非技术用户。
+
+            ### 📥 下载
+
+            | 平台 | 文件 | 说明 |
+            |------|------|------|
+            | macOS | `ai-config-doctor-macos` | `chmod +x` 后直接运行 |
+            | Windows | `ai-config-doctor-windows.exe` | 双击运行 |
+            | Linux | `ai-config-doctor-linux` | `chmod +x` 后直接运行 |
+
+            ### 🚀 使用
+
+            下载对应平台文件后直接运行，无需安装 Python 或任何依赖。
+
+            ---
+            by [docode.cc](https://docode.cc) · QQ：3963220481
+          files: |
+            artifacts/ai-config-doctor-macos/ai-config-doctor-macos
+            artifacts/ai-config-doctor-windows.exe/ai-config-doctor-windows.exe
+            artifacts/ai-config-doctor-linux/ai-config-doctor-linux
