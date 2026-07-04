@@ -239,6 +239,17 @@ requires_openai_auth = true
 
 ---
 
+## 🌐 Language
+
+AI Config Doctor follows your system language automatically: Chinese locales use Simplified Chinese, and other locales use English. You can also force a language:
+
+```bash
+AI_CONFIG_DOCTOR_LANG=en python3 check_codex.py
+AI_CONFIG_DOCTOR_LANG=zh python3 check_codex.py
+```
+
+---
+
 ## 🎨 Terminal Theme
 
 Colors adapt to light and dark terminal backgrounds automatically. You can also force a theme:

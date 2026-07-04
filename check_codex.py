@@ -7,6 +7,7 @@ AI Config Doctor
 
 import sys
 import os
+import builtins
 import json
 import platform
 import re
@@ -22,6 +23,243 @@ CODEX_DESKTOP_URL = "https://codex.com"
 NODE_DOWNLOAD_URL = "https://nodejs.org/zh-cn/download"
 APP_NAME = "AI Config Doctor"
 APP_SUBTITLE = "Codex / Claude Code 配置诊断与向导"
+
+
+def _detect_language():
+    forced = os.environ.get("AI_CONFIG_DOCTOR_LANG", "").strip().lower()
+    if forced in ("zh", "zh-cn", "zh_cn", "cn"):
+        return "zh"
+    if forced in ("en", "en-us", "en_us"):
+        return "en"
+    for key in ("LC_ALL", "LC_MESSAGES", "LANGUAGE", "LANG"):
+        value = os.environ.get(key, "").strip().lower()
+        if not value:
+            continue
+        first = value.split(":", 1)[0]
+        return "zh" if first.startswith("zh") else "en"
+    return "en"
+
+
+LANGUAGE = _detect_language()
+
+TRANSLATIONS = {
+    "Codex / Claude Code 配置诊断与向导": "Codex / Claude Code configuration doctor and guide",
+    "时间未知": "Unknown time",
+    "未命名会话": "Untitled session",
+    "暂无摘要": "No summary",
+    "项目路径未知": "Unknown project path",
+    "摘要：": "Summary: ",
+    "没有找到可恢复的 ": "No resumable ",
+    " 会话。": " sessions found.",
+    "请先运行一次对应 CLI，并完成至少一轮对话。": "Run the matching CLI once and complete at least one conversation first.",
+    "已找到 ": "Found ",
+    " 个会话，默认展示最近 ": " sessions. Showing the latest ",
+    " 个。": ".",
+    "请根据时间、项目路径和摘要选择你想恢复的对话。": "Choose the conversation to resume by time, project path, and summary.",
+    "返回主菜单": "Back to main menu",
+    "请选择要恢复的会话序号": "Choose a session number to resume",
+    "已返回主菜单。": "Returned to main menu.",
+    "序号无效，已返回主菜单。": "Invalid number. Returned to main menu.",
+    "恢复指导": "Resume guide",
+    "你选择的会话：": "Selected session: ",
+    "项目目录：": "Project directory: ",
+    "恢复命令：": "Resume command: ",
+    "在当前终端执行恢复命令": "Run the resume command in this terminal",
+    "只显示命令，稍后手动复制执行": "Show command only; copy and run it later",
+    "请选择恢复方式": "Choose how to resume",
+    "未知": "Unknown",
+    "项目目录已不存在：": "Project directory no longer exists: ",
+    "将在当前终端目录下执行恢复命令。": "The resume command will run in the current terminal directory.",
+    "正在执行：": "Running: ",
+    "正在执行: ": "Running: ",
+    "命令不存在，请先安装对应 CLI。": "Command not found. Install the matching CLI first.",
+    "你也可以手动执行：": "You can also run manually: ",
+    "执行失败：": "Failed: ",
+    "执行失败: ": "Failed: ",
+    "建议先进入项目目录：cd ": "Recommended: enter the project directory first: cd ",
+    "Codex 配置": "Codex configuration",
+    "Claude Code 配置": "Claude Code configuration",
+    "配置目录是否存在": "Config directory exists",
+    "目录不存在: ": "Directory does not exist: ",
+    "Codex 配置目录缺失，请先安装并运行一次 codex": "Codex config directory is missing. Install and run codex once first.",
+    "config.toml 是否存在": "config.toml exists",
+    "文件不存在": "File does not exist",
+    "缺少 ~/.codex/config.toml，请参考文档创建该文件": "Missing ~/.codex/config.toml. Create it according to the docs.",
+    "base_url 是否配置": "base_url configured",
+    "model 是否配置": "model configured",
+    "未设置（可选，建议填写）": "Not set (optional, recommended)",
+    "文件读取出错: ": "File read error: ",
+    "config.toml 读取出错，请检查文件格式": "Failed to read config.toml. Check the file format.",
+    "auth.json 是否存在": "auth.json exists",
+    "缺少 ~/.codex/auth.json，请参考文档创建该文件": "Missing ~/.codex/auth.json. Create it according to the docs.",
+    "OPENAI_API_KEY 是否设置": "OPENAI_API_KEY set",
+    "值为空": "Empty value",
+    "auth.json 中 OPENAI_API_KEY 未设置": "OPENAI_API_KEY is not set in auth.json",
+    "值过短": "Value is too short",
+    "长度 ": "length ",
+    "可能无效": "may be invalid",
+    "OPENAI_API_KEY 看起来不完整，请检查是否完整粘贴": "OPENAI_API_KEY looks incomplete. Check whether it was fully pasted.",
+    "不是合法 JSON: ": "Invalid JSON: ",
+    "auth.json 格式错误，请检查内容": "auth.json format error. Check the content.",
+    "读取失败: ": "Read failed: ",
+    "auth.json 读取出错": "Failed to read auth.json",
+    "settings.json 是否存在": "settings.json exists",
+    "缺少 ~/.claude/settings.json，请先运行一次 Claude Code 生成配置": "Missing ~/.claude/settings.json. Run Claude Code once to generate config.",
+    "ANTHROPIC_BASE_URL 是否设置": "ANTHROPIC_BASE_URL set",
+    "ANTHROPIC_AUTH_TOKEN 是否设置": "ANTHROPIC_AUTH_TOKEN set",
+    "ANTHROPIC_MODEL 是否设置": "ANTHROPIC_MODEL set",
+    "ANTHROPIC_SMALL_FAST_MODEL 是否设置": "ANTHROPIC_SMALL_FAST_MODEL set",
+    "未设置（建议填写）": "Not set (recommended)",
+    "settings.json 的 env 中缺少 ANTHROPIC_AUTH_TOKEN，请添加你的 API Key": "ANTHROPIC_AUTH_TOKEN is missing in settings.json env. Add your API key.",
+    "ANTHROPIC_AUTH_TOKEN 看起来不完整，请检查是否完整粘贴": "ANTHROPIC_AUTH_TOKEN looks incomplete. Check whether it was fully pasted.",
+    "settings.json 格式错误，请检查内容": "settings.json format error. Check the content.",
+    "settings.json 读取出错": "Failed to read settings.json",
+    "不能填写 localhost / 127.0.0.1 / 局域网等本地地址，请修改为第三方 API 公网地址": "Do not use localhost / 127.0.0.1 / LAN addresses. Use a public third-party API address.",
+    "API 地址不能使用 localhost / 127.0.0.1 / 局域网等本地地址，请改为第三方 API 公网地址。": "The API address cannot be localhost / 127.0.0.1 / LAN. Use a public third-party API address.",
+    "应以 http:// 或 https:// 开头": "Should start with http:// or https://",
+    "未设置，请添加第三方 API 地址": "Not set. Add a third-party API address.",
+    "格式可能有误": "format may be incorrect",
+    "配置 Codex": "Configure Codex",
+    "配置 Claude Code": "Configure Claude Code",
+    "按步骤填写，直接回车跳过该项（保持现有值不变）。": "Fill in each step. Press Enter to skip an item and keep the current value.",
+    "未找到 ~/.codex 目录，是否现在创建？": "~/.codex was not found. Create it now?",
+    "未找到 ~/.claude 目录，是否现在创建？": "~/.claude was not found. Create it now?",
+    "已创建 ": "Created ",
+    "API 地址（base_url）": "API address (base_url)",
+    "API 地址、Key/Token 和模型": "API address, Key/Token, and model",
+    "（不能使用本地地址）": " (local addresses are not allowed)",
+    "是否获取模型列表并选择？": "Fetch model list and choose one?",
+    "正在获取模型列表...": "Fetching model list...",
+    "未能自动获取模型列表。": "Could not automatically fetch the model list.",
+    "服务器拒绝访问模型列表，可能是该 Key 没有 models 权限、模型接口被服务商关闭，或模型列表路径不兼容。": "The server denied access to the model list. The key may lack models permission, the provider may have disabled the endpoint, or the model-list path may be incompatible.",
+    "认证失败，请检查 Key/Token 是否正确。": "Authentication failed. Check whether the Key/Token is correct.",
+    "返回: ": "Response: ",
+    "你可以手动填写模型名，或稍后在服务商后台确认模型列表接口权限。": "You can enter a model name manually, or later check model-list permissions in the provider dashboard.",
+    "例：": "Examples: ",
+    "可用模型": "Available models",
+    "手动填写模型名": "Enter model name manually",
+    "请选择模型序号": "Choose a model number",
+    "直接回车跳过": "press Enter to skip",
+    "请输入 1-": "Enter 1-",
+    "之间的数字。": ".",
+    "首次安装配置必须选择模型。": "First-time setup requires choosing a model.",
+    "首次安装配置必须填写模型名。": "First-time setup requires entering a model name.",
+    "未输入任何内容，已取消。": "Nothing entered. Cancelled.",
+    "auth.json 已写入 API Key": "auth.json API key written",
+    "config.toml 已写入 base_url": "config.toml base_url written",
+    "config.toml 已写入 model": "config.toml model written",
+    "配置完成！建议重新运行「检查 Codex 配置」验证。": "Configuration complete. Re-run Check Codex configuration to verify.",
+    "Claude 4 项配置提醒": "Claude four-field configuration reminder",
+    "第 3/4 项是主模型 ANTHROPIC_MODEL；第 4/4 项是快速模型 ANTHROPIC_SMALL_FAST_MODEL。": "Item 3/4 is the main model ANTHROPIC_MODEL; item 4/4 is the fast model ANTHROPIC_SMALL_FAST_MODEL.",
+    "两项可以选择不同模型，也可以在服务商只提供少量模型时填写同一个模型。": "You may choose different models, or use the same model if the provider offers only a few.",
+    "是否先获取模型列表用于第 3/4、4/4 项选择？": "Fetch the model list first for items 3/4 and 4/4?",
+    "3/4 主模型（ANTHROPIC_MODEL）": "3/4 Main model (ANTHROPIC_MODEL)",
+    "4/4 快速模型（ANTHROPIC_SMALL_FAST_MODEL）": "4/4 Fast model (ANTHROPIC_SMALL_FAST_MODEL)",
+    "选择主模型（ANTHROPIC_MODEL）": "Choose main model (ANTHROPIC_MODEL)",
+    "选择快速模型（ANTHROPIC_SMALL_FAST_MODEL）": "Choose fast model (ANTHROPIC_SMALL_FAST_MODEL)",
+    "手动填写主模型（ANTHROPIC_MODEL）": "Enter main model (ANTHROPIC_MODEL) manually",
+    "手动填写快速模型（ANTHROPIC_SMALL_FAST_MODEL）": "Enter fast model (ANTHROPIC_SMALL_FAST_MODEL) manually",
+    "可跳过": "optional",
+    "首次安装配置必须填写主模型和快速模型。": "First-time setup requires both the main model and fast model.",
+    "ANTHROPIC_BASE_URL 已写入": "ANTHROPIC_BASE_URL written",
+    "ANTHROPIC_AUTH_TOKEN 已写入": "ANTHROPIC_AUTH_TOKEN written",
+    "ANTHROPIC_MODEL 已写入": "ANTHROPIC_MODEL written",
+    "ANTHROPIC_SMALL_FAST_MODEL 已写入": "ANTHROPIC_SMALL_FAST_MODEL written",
+    "配置完成！建议重新运行「检查 Claude Code 配置」验证。": "Configuration complete. Re-run Check Claude Code configuration to verify.",
+    "安装 Codex Desktop": "Install Codex Desktop",
+    "检测 Codex Desktop 是否已安装": "Check whether Codex Desktop is installed",
+    "已安装": "Installed",
+    "未检测到": "Not detected",
+    "是否现在配置第三方 API 地址、Key 和模型？": "Configure third-party API address, key, and model now?",
+    "是否现在先写入第三方 API 地址、Key 和模型？": "Write third-party API address, key, and model now?",
+    "Codex Desktop 是图形界面应用，需要手动下载安装包。": "Codex Desktop is a GUI app and requires manually downloading the installer.",
+    "下载地址: ": "Download URL: ",
+    "是否立即打开下载页？": "Open the download page now?",
+    "已在浏览器中打开下载页。": "Opened the download page in your browser.",
+    "下载完成后按提示安装。": "After downloading, follow the installer prompts.",
+    "请手动访问 ": "Please manually visit ",
+    "下载安装。": " to download and install.",
+    "安装 Codex CLI": "Install Codex CLI",
+    "安装 Claude CLI": "Install Claude CLI",
+    "检测 Codex CLI 是否已安装": "Check whether Codex CLI is installed",
+    "检测 Claude CLI 是否已安装": "Check whether Claude CLI is installed",
+    "检测 Node.js / npm 是否可用": "Check whether Node.js / npm is available",
+    "未找到 npm": "npm not found",
+    "安装 Codex CLI 需要先安装 Node.js。": "Installing Codex CLI requires Node.js first.",
+    "安装 Claude CLI 需要先安装 Node.js。": "Installing Claude CLI requires Node.js first.",
+    "将尝试通过系统包管理器自动安装，需要一次性确认。": "The tool will try to install it with the system package manager and may require confirmation.",
+    "是否现在自动安装 Node.js？": "Install Node.js automatically now?",
+    "已取消。Node.js 下载地址: ": "Cancelled. Node.js download URL: ",
+    "自动安装 Node.js 失败。": "Automatic Node.js installation failed.",
+    "请手动安装后重新运行本工具。下载地址: ": "Install manually, then run this tool again. Download URL: ",
+    "是否立即打开 Node.js 下载页？": "Open the Node.js download page now?",
+    "Node.js 安装成功！": "Node.js installed successfully!",
+    "npm 可用": "npm available",
+    "确认安装 Codex CLI？": "Install Codex CLI?",
+    "确认安装 Claude CLI？": "Install Claude CLI?",
+    "已取消。": "Cancelled.",
+    "Codex CLI 安装成功！": "Codex CLI installed successfully!",
+    "Claude CLI 安装成功！": "Claude CLI installed successfully!",
+    "版本: ": "Version: ",
+    "是否现在配置 API 地址、Key 和模型？": "Configure API address, key, and model now?",
+    "是否现在配置 API 地址、Token 和模型？": "Configure API address, token, and model now?",
+    "安装失败，请检查网络或手动执行：": "Installation failed. Check the network or run manually: ",
+    "恢复 Codex 会话": "Resume Codex session",
+    "恢复 Claude Code 会话": "Resume Claude Code session",
+    "正在扫描 ~/.codex/sessions 和 ~/.codex/archived_sessions...": "Scanning ~/.codex/sessions and ~/.codex/archived_sessions...",
+    "正在扫描 ~/.claude/projects...": "Scanning ~/.claude/projects...",
+    "请选择操作": "Choose an action",
+    "配置检查": "Configuration check",
+    "检查 Codex 配置": "Check Codex configuration",
+    "检查 Claude Code 配置": "Check Claude Code configuration",
+    "可解决 95% 的连接问题": "Fixes 95% of connection issues",
+    "安装引导": "Install guide",
+    "安装 Codex Desktop  ": "Install Codex Desktop  ",
+    "安装 Codex CLI      ": "Install Codex CLI      ",
+    "安装 Claude CLI     ": "Install Claude CLI     ",
+    "图形界面 App": "GUI app",
+    "命令行": "CLI",
+    "会话恢复": "Session resume",
+    "恢复 Codex 会话       ": "Resume Codex session      ",
+    "恢复 Claude Code 会话 ": "Resume Claude Code session",
+    "可浏览最近 20 条对话记录": "Browse the latest 20 conversations",
+    "退出": "Exit",
+    "直接回车默认检查 Codex 配置，输入 0 退出": "Press Enter to check Codex configuration by default; enter 0 to exit",
+    "检查结果": "Check result",
+    "全部配置正常，可以运行 codex / claude 试试。": "All configuration looks good. Try running codex / claude.",
+    "发现 ": "Found ",
+    " 个问题，请逐项修复：": " issues. Fix them one by one:",
+    "配置操作": "configuration actions",
+    "直接回车或输入 0 返回主菜单": "Press Enter or enter 0 to return to the main menu",
+    "检测到配置问题，请选择修复范围：": "Configuration issues detected. Choose what to fix:",
+    "配置正常。如需修改，请选择修改范围：": "Configuration looks good. Choose what to modify if needed:",
+    "全部更改": "Change everything",
+    "只更改 URL": "Change URL only",
+    "只更改 Key/Token": "Change Key/Token only",
+    "获取最新模型并选择": "Fetch latest models and choose",
+    "建议选择 1 完整修复": "Recommended: choose 1 for a complete fix",
+    "如不修改可直接回车": "Press Enter if no changes are needed",
+    "请选择操作（": "Choose an action (",
+    "按回车键返回主菜单...": "Press Enter to return to the main menu...",
+    "系统: ": "System: ",
+}
+
+
+def _translate_text(text):
+    if LANGUAGE == "zh" or not isinstance(text, str):
+        return text
+    translated = text
+    for source in sorted(TRANSLATIONS, key=len, reverse=True):
+        translated = translated.replace(source, TRANSLATIONS[source])
+    return translated
+
+
+def print(*args, **kwargs):
+    builtins.print(*[_translate_text(arg) for arg in args], **kwargs)
+
+
+def input(prompt=""):
+    return builtins.input(_translate_text(prompt))
 
 # ── 颜色支持 ──────────────────────────────────────────────
 if sys.platform == "win32":
@@ -85,6 +323,7 @@ def panel(text="", color=WHITE, bg=BG_PANEL):
 
 # ── 步骤输出：先打描述，检查完在同行追加结果 ──────────────
 def step(msg):
+    msg = _translate_text(msg)
     sys.stdout.write(f"    {DIM}│{RESET} {MUTED}{msg:<26}{RESET} ")
     sys.stdout.flush()
 

@@ -203,6 +203,17 @@ requires_openai_auth = true
 
 ---
 
+## 🌐 语言
+
+AI Config Doctor 会自动跟随系统语言：中文系统显示简体中文，其他语言默认显示英文。也可以手动指定：
+
+```bash
+AI_CONFIG_DOCTOR_LANG=en python3 check_codex.py   # 强制英文
+AI_CONFIG_DOCTOR_LANG=zh python3 check_codex.py   # 强制中文
+```
+
+---
+
 ## ⚙️ 主题配色
 
 终端配色自动适配浅色/深色背景，也可手动指定：
