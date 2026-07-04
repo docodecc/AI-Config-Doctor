@@ -30,7 +30,7 @@
 
 ## 📸 截图
 
-> *(可在此处插入终端截图)*
+![AI Config Doctor 主菜单](./docs/images/screenshot-main-menu.webp)
 
 ---
 

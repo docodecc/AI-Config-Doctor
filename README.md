@@ -29,7 +29,7 @@
 
 ## 📸 Screenshot
 
-> *(Terminal screenshot coming soon.)*
+![AI Config Doctor main menu](./docs/images/screenshot-main-menu.webp)
 
 ---
 
