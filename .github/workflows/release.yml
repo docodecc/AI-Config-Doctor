@@ -44,11 +44,36 @@ jobs:
         shell: bash
         run: mv "dist/${{ matrix.artifact_name }}" "dist/${{ matrix.asset_name }}"
 
+      - name: Create macOS installer package
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          PKG_ROOT="pkg-root"
+          mkdir -p "$PKG_ROOT/usr/local/bin" "$PKG_ROOT/Applications"
+          cp "dist/${{ matrix.asset_name }}" "$PKG_ROOT/usr/local/bin/ai-config-doctor"
+          cat > "$PKG_ROOT/Applications/AI Config Doctor.command" <<'SCRIPT'
+          #!/bin/zsh
+          /usr/local/bin/ai-config-doctor
+          echo
+          echo "Press Enter to close this window..."
+          read -r _
+          SCRIPT
+          chmod +x "$PKG_ROOT/usr/local/bin/ai-config-doctor" "$PKG_ROOT/Applications/AI Config Doctor.command"
+          pkgbuild             --root "$PKG_ROOT"             --identifier "cc.docode.ai-config-doctor"             --version "$VERSION"             --install-location "/"             "dist/${{ matrix.asset_name }}.pkg"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
           path: dist/${{ matrix.asset_name }}
+
+      - name: Upload macOS installer package
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}.pkg
+          path: dist/${{ matrix.asset_name }}.pkg
 
   release:
     needs: build
@@ -83,7 +108,9 @@ jobs:
             | 平台 | 文件 | 说明 |
             |------|------|------|
             | macOS Apple Silicon | `ai-config-doctor-macos-arm64` | M1/M2/M3/M4，`chmod +x` 后运行 |
+            | macOS Apple Silicon 安装包 | `ai-config-doctor-macos-arm64.pkg` | 双击安装，安装后可运行 `ai-config-doctor` |
             | macOS Intel | `ai-config-doctor-macos-x64` | Intel Mac，`chmod +x` 后运行 |
+            | macOS Intel 安装包 | `ai-config-doctor-macos-x64.pkg` | 双击安装，安装后可运行 `ai-config-doctor` |
             | Windows x64 | `ai-config-doctor-windows-x64.exe` | Windows 10/11 64 位，双击运行 |
             | Linux x64 | `ai-config-doctor-linux-x64` | `chmod +x` 后运行 |
 
@@ -97,7 +124,9 @@ jobs:
             MIT License · by [docode.cc](https://docode.cc)
           files: |
             artifacts/ai-config-doctor-macos-arm64/ai-config-doctor-macos-arm64
+            artifacts/ai-config-doctor-macos-arm64.pkg/ai-config-doctor-macos-arm64.pkg
             artifacts/ai-config-doctor-macos-x64/ai-config-doctor-macos-x64
+            artifacts/ai-config-doctor-macos-x64.pkg/ai-config-doctor-macos-x64.pkg
             artifacts/ai-config-doctor-windows-x64.exe/ai-config-doctor-windows-x64.exe
             artifacts/ai-config-doctor-linux-x64/ai-config-doctor-linux-x64
             artifacts/SHA256SUMS.txt

@@ -41,16 +41,29 @@ Go to the [Releases](../../releases) page and download the file for your platfor
 
 | Platform | File |
 |---|---|
-| macOS Apple Silicon | `ai-config-doctor-macos-arm64` |
-| macOS Intel | `ai-config-doctor-macos-x64` |
+| macOS Apple Silicon | `ai-config-doctor-macos-arm64.pkg` *(installer)* or `ai-config-doctor-macos-arm64` |
+| macOS Intel | `ai-config-doctor-macos-x64.pkg` *(installer)* or `ai-config-doctor-macos-x64` |
 | Windows x64 | `ai-config-doctor-windows-x64.exe` |
 | Linux x64 | `ai-config-doctor-linux-x64` |
 
-**macOS / Linux:**
+**macOS:**
+
+Download the `.pkg` installer and double-click it to install. After installation, run `ai-config-doctor` from Terminal, or open `/Applications/AI Config Doctor.command`.
+
+If macOS blocks the installer because it was downloaded from the Internet, right-click the `.pkg` file and choose **Open** once.
+
+Advanced users can also run the raw binary without installing:
 
 ```bash
 chmod +x ai-config-doctor-macos-arm64
 ./ai-config-doctor-macos-arm64
+```
+
+**Linux:**
+
+```bash
+chmod +x ai-config-doctor-linux-x64
+./ai-config-doctor-linux-x64
 ```
 
 **Windows:**
