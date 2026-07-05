@@ -55,6 +55,8 @@
 如果 macOS 提示来自互联网无法打开，请右键 `.pkg` 文件并选择“打开”。
 
 **Linux：**
+请将 `vX.Y.Z` 替换成你实际下载的版本号，例如 `v1.0.5`。
+
 Debian / Ubuntu / Linux Mint 用户可以安装 `.deb`：
 
 ```bash

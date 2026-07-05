@@ -55,6 +55,8 @@ If macOS blocks the installer because it was downloaded from the Internet, right
 
 **Linux:**
 
+Replace `vX.Y.Z` with the actual version number you downloaded, for example `v1.0.5`.
+
 Install the Debian package on Debian / Ubuntu / Linux Mint:
 
 ```bash

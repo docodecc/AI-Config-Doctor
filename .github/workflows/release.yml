@@ -20,7 +20,7 @@ jobs:
           - os: windows-latest
             artifact_name: ai-config-doctor.exe
             asset_name: ai-config-doctor-windows-x64.exe
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             artifact_name: ai-config-doctor
             asset_name: ai-config-doctor-linux-x64
 
